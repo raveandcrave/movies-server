@@ -1,9 +1,11 @@
 import {Module} from '@nestjs/common';
 import {ConfigModule} from '@nestjs/config';
 import {TypeOrmModule} from '@nestjs/typeorm';
-import {User} from './users/users.entity';
 
+import {User} from './users/users.entity';
 import {UsersModule} from './users/users.module';
+import {RolesModule} from './roles/roles.module';
+import {Role} from './roles/roles.entity';
 
 @Module({
   controllers: [],
@@ -19,11 +21,12 @@ import {UsersModule} from './users/users.module';
       username: process.env.POSTGRES_USER,
       password: process.env.POSTGRES_PASSWORD,
       database: process.env.POSTGRES_DB,
-      entities: [User],
+      entities: [User, Role],
       synchronize: true,
-      entityPrefix: 'MOVIES#',
+      logging: 'all',
     }),
     UsersModule,
+    RolesModule,
   ],
 })
 export class AppModule {}

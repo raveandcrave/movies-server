@@ -1,7 +1,8 @@
 import {ApiProperty} from '@nestjs/swagger';
-import {Column, Entity, PrimaryGeneratedColumn} from 'typeorm';
+import {Role} from 'src/roles/roles.entity';
+import {Column, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn} from 'typeorm';
 
-@Entity('Users')
+@Entity('users')
 export class User {
   @ApiProperty({example: '1', description: 'Уникальный идентификатор'})
   @PrimaryGeneratedColumn()
@@ -19,7 +20,12 @@ export class User {
   @Column({default: false})
   banned: boolean;
 
-  @ApiProperty({example: 'Не любит кино', description: 'Причина бана'})
+  @ApiProperty({example: 'Не любит кино', description: 'Причина бана', required: false})
   @Column({nullable: true})
   banReason: string;
+
+  @ApiProperty({type: [Role], example: ['USER', 'ADMIN'], description: 'Роли пользователя'})
+  @ManyToMany(() => Role, (role) => role.users, {cascade: ['insert'], eager: true})
+  @JoinTable({name: 'user_roles'})
+  roles: Role[];
 }

@@ -32,4 +32,13 @@ export class UsersService {
       console.error(e);
     }
   }
+
+  async getUserByEmail(email: string) {
+    try {
+      const user = await this.usersRepository.findOneBy({email});
+      return user;
+    } catch (err) {
+      console.error(err);
+    }
+  }
 }

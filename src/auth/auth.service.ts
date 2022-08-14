@@ -111,7 +111,7 @@ export class AuthService {
     throw new UnauthorizedException({message: 'Некорректный email или пароль'});
   }
 
-  private validateAccessToken(token) {
+  validateAccessToken(token) {
     try {
       const userData = this.jwtService.verify(token, {secret: process.env.JWT_SECRET});
       return userData;

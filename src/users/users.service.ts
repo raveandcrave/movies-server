@@ -45,6 +45,14 @@ export class UsersService {
     return user;
   }
 
+  async getUserById(id: number) {
+    const user = await this.usersRepository.findOneBy({id});
+    if (!user) {
+      throw new HttpException('Пользователь не найден', HttpStatus.NOT_FOUND);
+    }
+    return user;
+  }
+
   async addRole(dto: AddRoleDto) {
     try {
       const user = await this.usersRepository.findOneBy({id: dto.userId});

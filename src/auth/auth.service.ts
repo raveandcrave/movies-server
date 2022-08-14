@@ -20,7 +20,11 @@ export class AuthService {
 
   async login(userDto: CreateUserDto) {
     const user = await this.validateUser(userDto);
-    return this.generateToken(user);
+
+    const tokens = this.generateTokens(user);
+    await this.saveToken(user.id, tokens.refreshToken);
+
+    return {...tokens, user};
   }
 
   async registration(userDto: CreateUserDto) {
@@ -33,13 +37,17 @@ export class AuthService {
     const hashPassword = await bcrypt.hash(userDto.password, 5);
     const user = await this.userService.createUser({...userDto, password: hashPassword});
 
-    const tokens = this.generateToken(user);
+    const tokens = this.generateTokens(user);
     await this.saveToken(user.id, tokens.refreshToken);
 
     return {...tokens, user};
   }
 
-  private generateToken(user: User) {
+  async logout(refreshToken) {
+    this.removeToken(refreshToken);
+  }
+
+  private generateTokens(user: User) {
     const payload = {email: user.email, id: user.id, roles: user.roles};
 
     const accessToken = this.jwtService.sign(payload, {secret: process.env.JWT_SECRET, expiresIn: '30m'});
@@ -63,9 +71,14 @@ export class AuthService {
     return token;
   }
 
+  private async removeToken(refreshToken) {
+    await this.tokensRepostory.delete({refreshToken});
+  }
+
   private async validateUser(userDto: CreateUserDto) {
     const user = await this.userService.getUserByEmail(userDto.email);
     const passwordEquals = await bcrypt.compare(userDto.password, user.password);
+
     if (user && passwordEquals) {
       return user;
     }

@@ -1,6 +1,6 @@
-import {Body, Controller, Post, Res} from '@nestjs/common';
+import {Body, Controller, Post, Req, Res} from '@nestjs/common';
 import {ApiTags} from '@nestjs/swagger';
-import {Response} from 'express';
+import {Response, Request} from 'express';
 
 import {CreateUserDto} from 'src/users/dto/create-user.dto';
 import {AuthService} from './auth.service';
@@ -11,8 +11,11 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/login')
-  login(@Body() userDto: CreateUserDto) {
-    return this.authService.login(userDto);
+  async login(@Body() userDto: CreateUserDto, @Res({passthrough: true}) response: Response) {
+    const userData = await this.authService.login(userDto);
+    response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
+
+    return userData;
   }
 
   @Post('/registration')
@@ -21,5 +24,16 @@ export class AuthController {
     response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
 
     return userData;
+  }
+
+  @Post('/logout')
+  async logout(@Req() request: Request, @Res({passthrough: true}) response: Response) {
+    try {
+      const {refreshToken} = request.cookies;
+      await this.authService.logout(refreshToken);
+      response.clearCookie('refreshToken');
+    } catch (err) {
+      console.error(err);
+    }
   }
 }

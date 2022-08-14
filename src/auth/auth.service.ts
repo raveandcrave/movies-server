@@ -6,6 +6,7 @@ import {Repository} from 'typeorm';
 
 import {UsersService} from 'src/users/users.service';
 import {CreateUserDto} from 'src/users/dto/create-user.dto';
+import {GetUserDto} from 'src/users/dto/get-user.dto';
 import {User} from 'src/users/users.entity';
 import {Token} from './tokens.entity';
 
@@ -18,29 +19,31 @@ export class AuthService {
     private tokensRepostory: Repository<Token>
   ) {}
 
-  async login(userDto: CreateUserDto) {
-    const user = await this.validateUser(userDto);
+  async login(dto: CreateUserDto) {
+    const user = await this.validateUser(dto);
 
-    const tokens = this.generateTokens(user);
+    const userDto = new GetUserDto(user);
+    const tokens = this.generateTokens({...userDto});
     await this.saveToken(user.id, tokens.refreshToken);
 
-    return {...tokens, user};
+    return {...tokens, user: userDto};
   }
 
-  async registration(userDto: CreateUserDto) {
-    const candidate = await this.userService.getUserByEmail(userDto.email);
+  async registration(dto: CreateUserDto) {
+    const candidate = await this.userService.getUserByEmail(dto.email);
 
     if (candidate) {
       throw new HttpException('Пользователь с таким email уже существует', HttpStatus.BAD_REQUEST);
     }
 
-    const hashPassword = await bcrypt.hash(userDto.password, 5);
-    const user = await this.userService.createUser({...userDto, password: hashPassword});
+    const hashPassword = await bcrypt.hash(dto.password, 5);
+    const user = await this.userService.createUser({...dto, password: hashPassword});
 
-    const tokens = this.generateTokens(user);
+    const userDto = new GetUserDto(user);
+    const tokens = this.generateTokens({...userDto});
     await this.saveToken(user.id, tokens.refreshToken);
 
-    return {...tokens, user};
+    return {...tokens, user: userDto};
   }
 
   async logout(refreshToken) {
@@ -61,13 +64,14 @@ export class AuthService {
 
     const user = await this.userService.getUserById(userData.id);
 
-    const tokens = this.generateTokens(user);
+    const userDto = new GetUserDto(user);
+    const tokens = this.generateTokens({...userDto});
     await this.saveToken(user.id, tokens.refreshToken);
 
-    return {...tokens, user};
+    return {...tokens, user: userDto};
   }
 
-  private generateTokens(user: User) {
+  private generateTokens(user: GetUserDto) {
     const payload = {email: user.email, id: user.id, roles: user.roles};
 
     const accessToken = this.jwtService.sign(payload, {secret: process.env.JWT_SECRET, expiresIn: '30m'});

@@ -28,25 +28,17 @@ export class AuthController {
 
   @Post('/logout')
   async logout(@Req() request: Request, @Res({passthrough: true}) response: Response) {
-    try {
-      const {refreshToken} = request.cookies;
-      await this.authService.logout(refreshToken);
-      response.clearCookie('refreshToken');
-    } catch (err) {
-      console.error(err);
-    }
+    const {refreshToken} = request.cookies;
+    await this.authService.logout(refreshToken);
+    response.clearCookie('refreshToken');
   }
 
   @Get('/refresh')
   async refresh(@Req() request: Request, @Res({passthrough: true}) response: Response) {
-    try {
-      const {refreshToken} = request.cookies;
-      const userData = await this.authService.refresh(refreshToken);
-      response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
+    const {refreshToken} = request.cookies;
+    const userData = await this.authService.refresh(refreshToken);
+    response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
 
-      return userData;
-    } catch (err) {
-      console.error(err);
-    }
+    return userData;
   }
 }

@@ -25,7 +25,7 @@ import {Token} from './auth/tokens.entity';
       database: process.env.POSTGRES_DB,
       entities: [User, Role, Token],
       synchronize: true,
-      logging: 'all',
+      //logging: 'all',
     }),
     UsersModule,
     RolesModule,

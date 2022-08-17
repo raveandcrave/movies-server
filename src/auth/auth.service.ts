@@ -7,7 +7,6 @@ import {Repository} from 'typeorm';
 import {UsersService} from 'src/users/users.service';
 import {CreateUserDto} from 'src/users/dto/create-user.dto';
 import {GetUserDto} from 'src/users/dto/get-user.dto';
-import {User} from 'src/users/users.entity';
 import {Token} from './tokens.entity';
 
 @Injectable()
@@ -74,7 +73,7 @@ export class AuthService {
   private generateTokens(user: GetUserDto) {
     const payload = {email: user.email, id: user.id, roles: user.roles};
 
-    const accessToken = this.jwtService.sign(payload, {secret: process.env.JWT_SECRET, expiresIn: '30m'});
+    const accessToken = this.jwtService.sign(payload, {secret: process.env.JWT_SECRET, expiresIn: '15m'});
     const refreshToken = this.jwtService.sign(payload, {secret: process.env.JWT_REFRESH_SECRET, expiresIn: '30d'});
 
     return {
@@ -126,7 +125,7 @@ export class AuthService {
 
   private validateRefreshToken(token) {
     try {
-      const userData = this.jwtService.verify<User>(token, {secret: process.env.JWT_REFRESH_SECRET});
+      const userData = this.jwtService.verify(token, {secret: process.env.JWT_REFRESH_SECRET});
       return userData;
     } catch (e) {
       return null;

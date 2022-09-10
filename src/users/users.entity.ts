@@ -8,6 +8,10 @@ export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @ApiProperty({example: 'uniqueUsername', description: 'Имя пользователя'})
+  @Column({unique: true})
+  username: string;
+
   @ApiProperty({example: 'user@mail.ru', description: 'Email'})
   @Column({unique: true})
   email: string;

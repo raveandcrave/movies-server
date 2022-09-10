@@ -6,6 +6,7 @@ import {Repository} from 'typeorm';
 
 import {UsersService} from 'src/users/users.service';
 import {CreateUserDto} from 'src/users/dto/create-user.dto';
+import {RegisterUserDto} from 'src/users/dto/register-user.dto';
 import {GetUserDto} from 'src/users/dto/get-user.dto';
 import {Token} from './tokens.entity';
 
@@ -28,7 +29,7 @@ export class AuthService {
     return {...tokens, user: userDto};
   }
 
-  async registration(dto: CreateUserDto) {
+  async registration(dto: RegisterUserDto) {
     const candidate = await this.userService.getUserByEmail(dto.email);
 
     if (candidate) {

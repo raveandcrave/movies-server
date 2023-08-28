@@ -15,6 +15,7 @@ export class AuthController {
   async login(@Body() userDto: CreateUserDto, @Res({passthrough: true}) response: Response) {
     const userData = await this.authService.login(userDto);
     response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
+    delete userData.refreshToken;
 
     return userData;
   }
@@ -23,6 +24,7 @@ export class AuthController {
   async registration(@Body() userDto: RegisterUserDto, @Res({passthrough: true}) response: Response) {
     const userData = await this.authService.registration(userDto);
     response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
+    delete userData.refreshToken;
 
     return userData;
   }
@@ -39,6 +41,7 @@ export class AuthController {
     const {refreshToken} = request.cookies;
     const userData = await this.authService.refresh(refreshToken);
     response.cookie('refreshToken', userData.refreshToken, {maxAge: 30 * 24 * 60 * 60 * 1000, httpOnly: true});
+    delete userData.refreshToken;
 
     return userData;
   }
